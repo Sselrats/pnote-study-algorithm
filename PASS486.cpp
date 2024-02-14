@@ -1,16 +1,21 @@
 #include <iostream>
+#include <vector>
 #include <map>
 using namespace std;
 void solve();
 int n, l, h;
-int MAX = 10000001;
-void setDivision();
-map<int, int> division;
+const int MAX = 10000001;
+void setData();
+typedef vector<int> VEC;
+int min_div[MAX];
+int min_div_exp[MAX];
+int div_count[MAX];
+vector<int> primes;
 int main()
 {
     int C;
     cin >> C;
-    setDivision();
+    setData();
     while (C--)
     {
         solve();
@@ -22,24 +27,60 @@ void solve()
     cin >> n >> l >> h;
     for (int i = l; i <= h; i++)
     {
-        if (division[i] == n)
+        if (div_count[i] == n)
         {
             count++;
         }
     }
-    cout << count;
+    cout << count << "\n";
 }
-void setDivision()
+void setData()
 {
     for (int i = 1; i < MAX; i++)
     {
-        for (int j = 1; j < MAX / i; j++)
+        bool done = false;
+
+        if (i == 1)
         {
-            if (division.find(i * j) == division.end())
+            vector<int> v;
+            min_div[i] = 0;
+            min_div_exp[i] = 0;
+            div_count[i] = 1;
+            done = true;
+            continue;
+        }
+
+        if (i == 2)
+        {
+            min_div[i] = i;
+            min_div_exp[i] = 1;
+            div_count[i] = 2;
+            done = true;
+            primes.push_back(i);
+            continue;
+        }
+
+        for (int j = 0; primes[j] * primes[j] <= i; j++)
+        {
+            int prime = primes[j];
+            if (i % prime == 0)
             {
-                division[i * j] = 0;
+                int exp = min_div[i / prime] == prime ? min_div_exp[i / prime] + 1 : 1;
+
+                min_div[i] = prime;
+                min_div_exp[i] = exp;
+                div_count[i] = div_count[i / prime] * (exp + 1) / exp;
+                done = true;
+                break;
             }
-            division[i * j]++;
+        }
+
+        if (!done)
+        {
+            min_div[i] = i;
+            min_div_exp[i] = 1;
+            div_count[i] = 2;
+            primes.push_back(i);
         }
     }
 }
